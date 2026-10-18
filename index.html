@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ספירת מלאי">
+<title>ספירת מלאי - בדיקה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F5F4F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.10);
+    --text: #1A1A18; --text2: #6B6B65; --hint: #A8A8A0;
+    --green: #2E7D32; --green-bg: #EAF3DE; --amber: #B26A00; --amber-bg: #FAEEDA;
+    --red: #B3261E; --red-bg: #FDECEA; --radius: 16px; --radius-sm: 10px;
+  }
+  html, body { background: var(--bg); font-family: 'Heebo', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 480px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .who { font-size: 13px; color: var(--text2); }
+  .who a { color: var(--text2); }
+  .bar { position: sticky; top: 0; z-index: 10; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+         padding: 8px 12px; margin-bottom: 1rem; font-size: 14px; display: flex; justify-content: space-between; gap: 8px; }
+  .bar.fail { background: var(--red-bg); border-color: var(--red); color: var(--red); font-weight: 700; }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  .label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
+  .row { display: flex; gap: 8px; }
+  input { flex: 1; min-width: 0; width: 100%; font-family: inherit; font-size: 24px; font-weight: 500; padding: 10px 12px;
+          border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; }
+  input.num { text-align: center; letter-spacing: 4px; direction: ltr; }
+  input:focus { border-color: rgba(0,0,0,0.35); }
+  .btn { padding: 12px 18px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: inherit;
+         font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .btn.wide { width: 100%; }
+  .btn:disabled { opacity: .5; }
+  .stack > * + * { margin-top: 10px; }
+  #reader { width: 100%; margin-top: 10px; border-radius: var(--radius-sm); overflow: hidden; }
+  .hint { font-size: 13px; color: var(--text2); margin-top: 8px; min-height: 18px; }
+  .err { color: var(--red); font-size: 13px; margin-top: 8px; white-space: pre-wrap; }
+  ul { list-style: none; }
+  li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid #eee; font-size: 15px; }
+  li .num { font-weight: 700; direction: ltr; letter-spacing: 2px; font-size: 17px; }
+  li .st { text-align: left; font-size: 13px; }
+  li.ok .st { color: var(--green); } li.dup .st { color: var(--amber); } li.bad .st { color: var(--red); } li.wait .st { color: var(--text2); }
+  #overlay { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
+             color: #fff; z-index: 1000; text-align: center; padding: 20px; pointer-events: none; }
+  #overlay .big { font-size: 68px; font-weight: 700; direction: ltr; letter-spacing: 6px; }
+  #overlay .msg { font-size: 30px; font-weight: 700; margin-top: 8px; }
+  #overlay .sub { font-size: 18px; margin-top: 8px; }
+  #overlay.ok { background: rgba(46,125,50,.93); } #overlay.dup { background: rgba(178,106,0,.95); } #overlay.bad { background: rgba(179,38,30,.95); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>ספירת מלאי</h1>
+    <div class="who" id="who"></div>
+  </div>
+
+  <!-- Sign-in -->
+  <div class="card stack" id="setup">
+    <div>
+      <label class="label" for="nameIn">שם הסורק/ת</label>
+      <input id="nameIn" autocomplete="off">
+    </div>
+    <div>
+      <label class="label" for="pinIn">קוד כניסה</label>
+      <input id="pinIn" class="num" type="password" inputmode="numeric" autocomplete="off">
+    </div>
+    <button class="btn wide" id="startBtn">התחלה</button>
+    <div class="err" id="setupErr"></div>
+  </div>
+
+  <!-- Scanning -->
+  <div id="main" class="hidden">
+    <div class="bar" id="bar"><span id="barText">הכול נשמר ✓</span><span id="barMs"></span></div>
+
+    <div class="card">
+      <label class="label" for="typed">הקלדת מספר פאה</label>
+      <form id="typeForm" class="row">
+        <input id="typed" class="num" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="12345">
+        <button class="btn" type="submit">שמירה</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <button class="btn wide" id="camBtn">📷 הפעלת מצלמה</button>
+      <div id="reader"></div>
+      <div class="hint" id="hint"></div>
+      <div class="err" id="camErr"></div>
+    </div>
+
+    <div class="card">
+      <label class="label">נקלטו לאחרונה</label>
+      <ul id="recent"></ul>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="big" id="ovNum"></div><div class="msg" id="ovMsg"></div><div class="sub" id="ovSub"></div></div>
+
+<script>
+// ---- Settings ----
+const API_URL = 'https://script.google.com/macros/s/AKfycby5Ng_zxDzsSuFG3d1yht8s8AYPthxA3VL4jDjCBgiPPuqhcEGJpSamSSDlncW9X84q/exec';   // the Apps Script /exec link
+const VALID = /^[1-9]\d{4}$/;
+
+// ---- Storage on this device (scans waiting to be saved survive closing the page) ----
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+let user  = store.get('st_user', null);   // { name, pin }
+let queue = store.get('st_queue', []);    // captures not yet confirmed by the server
+const known = {};                         // wig number -> { by, time } already counted
+const rows  = {};                         // client id -> list row on screen
+const $ = id => document.getElementById(id);
+
+function deviceName() {
+  const ua = navigator.userAgent;
+  const dev = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'iPad'
+            : /iPhone/.test(ua) ? 'iPhone' : /Android/.test(ua) ? 'Android' : 'Other';
+  const br = /CriOS|Chrome/.test(ua) ? 'Chrome' : /FxiOS|Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Browser';
+  return dev + ' / ' + br;
+}
+function timeNow() { return new Date().toTimeString().slice(0, 8); }
+
+async function api(payload) {
+  // text/plain body = no CORS preflight, which Apps Script can't answer
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ pin: user && user.pin }, payload)) });
+  return res.json();
+}
+
+// ---- Feedback: colour, sound, vibration ----
+let audioCtx = null;
+function unlockAudio() {
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) {}
+}
+document.addEventListener('click', unlockAudio, true);
+document.addEventListener('keydown', unlockAudio, true);
+
+function tone(freq, start, len, type) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq; g.gain.value = 0.2;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(audioCtx.currentTime + start); o.stop(audioCtx.currentTime + start + len);
+}
+function feedback(kind) {
+  try {
+    if (audioCtx) {
+      if (kind === 'ok') tone(880, 0, 0.12);
+      else if (kind === 'dup') { tone(660, 0, 0.15); tone(660, 0.25, 0.15); }
+      else tone(220, 0, 0.5, 'square');
+    }
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate(kind === 'ok' ? 100 : [200, 100, 200]);
+}
+
+let ovTimer = null;
+function flash(kind, num, msg, sub) {
+  const ov = $('overlay');
+  ov.className = kind; ov.style.display = 'flex';
+  $('ovNum').textContent = num; $('ovMsg').textContent = msg; $('ovSub').textContent = sub || '';
+  clearTimeout(ovTimer);
+  ovTimer = setTimeout(() => { ov.style.display = 'none'; }, kind === 'ok' ? 800 : 2500);
+  feedback(kind);
+}
+
+function addRow(cid, num, method) {
+  const li = document.createElement('li');
+  const n = document.createElement('span'); n.className = 'num'; n.textContent = num;
+  const m = document.createElement('span'); m.className = 'st'; m.style.textAlign = 'right'; m.textContent = method === 'scanned' ? '📷' : '⌨️';
+  const s = document.createElement('span'); s.className = 'st';
+  li.append(n, m, s);
+  const ul = $('recent'); ul.insertBefore(li, ul.firstChild);
+  while (ul.children.length > 30) ul.removeChild(ul.lastChild);
+  rows[cid] = { li, st: s, num, shownDup: false };
+  return rows[cid];
+}
+function setRow(row, cls, text) { if (row) { row.li.className = cls; row.st.textContent = text; } }
+
+// ---- Capture: instant answer on this device, saved in the background ----
+function capture(num, method) {
+  if (!VALID.test(num)) { flash('bad', num || '-----', 'מספר לא תקין', 'מספר פאה = 5 ספרות'); return; }
+  const cid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const row = addRow(cid, num, method);
+  const prev = known[num];
+  if (prev) {
+    row.shownDup = true;
+    setRow(row, 'dup', '⚠ כבר נספרה · ' + prev.by + ' ' + prev.time);
+    flash('dup', num, 'כבר נספרה', 'ע"י ' + prev.by + ' בשעה ' + prev.time);
+  } else {
+    known[num] = { by: user.name, time: timeNow() };
+    setRow(row, 'wait', '⏳ שומר...');
+    flash('ok', num, 'נקלט ✓', method === 'scanned' ? 'סריקה' : 'הקלדה');
+  }
+  queue.push({ cid, number: num, method });   // duplicates are sent too, so they get logged
+  store.set('st_queue', queue);
+  scheduleFlush(150);
+}
+
+let inflight = false, failCount = 0, flushTimer = null, lastMs = null;
+function scheduleFlush(ms) { clearTimeout(flushTimer); flushTimer = setTimeout(flush, ms); }
+
+async function flush() {
+  if (inflight || !user || !queue.length) { updateBar(); return; }
+  inflight = true; updateBar();
+  const batch = queue.slice(0, 25);
+  const t0 = performance.now();
+  let retry = false;
+  try {
+    const res = await api({ action: 'save', by: user.name, device: deviceName(), items: batch });
+    if (!res.ok) {
+      if (res.error === 'pin') { signOut('הקוד שונה - הכניסו קוד חדש'); return; }
+      throw new Error(res.error);
+    }
+    lastMs = Math.round(performance.now() - t0);
+    failCount = 0;
+    const done = {};
+    res.results.forEach(r => { done[r.cid] = true; applyResult(r); });
+    queue = queue.filter(q => !done[q.cid]);
+    store.set('st_queue', queue);
+  } catch (e) {
+    failCount++; retry = true;
+  } finally {
+    inflight = false; updateBar();
+    if (queue.length && user) scheduleFlush(retry ? Math.min(15000, 2000 * failCount) : 0);
+  }
+}
+
+function applyResult(r) {
+  const row = rows[r.cid];
+  if (r.status === 'saved') {
+    if (row && !row.shownDup) setRow(row, 'ok', '✓ נשמר ' + r.time);
+  } else if (r.status === 'duplicate') {
+    if (row) {
+      known[row.num] = { by: r.by, time: r.time };
+      if (!row.shownDup) {   // another phone counted it a moment earlier
+        row.shownDup = true;
+        flash('dup', row.num, 'כבר נספרה', 'ע"י ' + r.by + ' בשעה ' + r.time);
+      }
+      setRow(row, 'dup', '⚠ כבר נספרה · ' + r.by + ' ' + r.time);
+    }
+  } else {
+    setRow(row, 'bad', '✗ לא תקין');
+  }
+}
+
+function updateBar() {
+  const bar = $('bar');
+  const n = queue.length;
+  if (failCount >= 2 && n) {
+    bar.className = 'bar fail';
+    $('barText').textContent = 'אין חיבור לשרת · ' + n + ' ממתינות. יישמרו אוטומטית - לא לסגור את הדף';
+  } else {
+    bar.className = 'bar';
+    $('barText').textContent = n ? '⏳ ממתינות לשמירה: ' + n : 'הכול נשמר ✓';
+  }
+  $('barMs').textContent = lastMs ? 'שמירה אחרונה: ' + (lastMs / 1000).toFixed(1) + ' שנ׳' : '';
+}
+
+// Everything already counted (by any phone), so duplicates are caught instantly.
+async function refreshKnown() {
+  if (!user) return;
+  try {
+    const res = await api({ action: 'list' });
+    if (res.ok) res.scans.forEach(s => { known[s[0]] = { by: s[1], time: s[2] }; });
+  } catch (e) {}
+}
+setInterval(refreshKnown, 15000);
+setInterval(() => { if (queue.length && !inflight) flush(); }, 10000);
+
+// ---- Sign in ----
+$('startBtn').addEventListener('click', async () => {
+  const name = $('nameIn').value.trim(), pin = $('pinIn').value.trim();
+  if (!name || !pin) { $('setupErr').textContent = 'יש למלא שם וקוד'; return; }
+  $('startBtn').disabled = true; $('setupErr').textContent = 'בודק...';
+  try {
+    user = { name, pin };
+    const res = await api({ action: 'ping' });
+    if (!res.ok) { user = null; $('setupErr').textContent = res.error === 'pin' ? 'קוד שגוי' : 'שגיאה: ' + res.error; return; }
+    store.set('st_user', user);
+    showMain();
+  } catch (e) {
+    user = null; $('setupErr').textContent = 'אין חיבור לשרת. בדקו אינטרנט ונסו שוב.';
+  } finally { $('startBtn').disabled = false; }
+});
+
+function showMain() {
+  $('setup').classList.add('hidden'); $('main').classList.remove('hidden');
+  $('who').textContent = '';
+  $('who').append(user.name + ' · ');
+  const a = document.createElement('a'); a.href = '#'; a.textContent = 'החלפה';
+  a.onclick = e => { e.preventDefault(); signOut(''); };
+  $('who').append(a);
+  updateBar(); refreshKnown(); flush();
+  $('typed').focus();
+}
+
+function signOut(msg) {
+  user = null; store.set('st_user', null);
+  stopCamera();
+  $('main').classList.add('hidden'); $('setup').classList.remove('hidden');
+  $('who').textContent = ''; $('setupErr').textContent = msg || '';
+}
+
+// ---- Typing ----
+$('typeForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('typed').value.trim();
+  $('typed').value = '';
+  capture(v, 'typed');
+  $('typed').focus();
+});
+
+// ---- Camera: accept only when the same number is read twice within 2 seconds ----
+let scanner = null, scanning = false, candidate = null, candidateTime = 0, lastAccepted = null, lastAcceptedTime = 0;
+
+function onDecode(text) {
+  text = String(text).trim();
+  if (!VALID.test(text)) { $('hint').textContent = 'ברקוד שאינו מספר פאה: ' + text; return; }
+  const now = Date.now();
+  if (text === lastAccepted && now - lastAcceptedTime < 4000) return;   // same label still in view
+  if (text === candidate && now - candidateTime < 2000) {
+    candidate = null; lastAccepted = text; lastAcceptedTime = now;
+    $('hint').textContent = 'כוונו לברקוד הבא';
+    capture(text, 'scanned');
+  } else {
+    candidate = text; candidateTime = now;
+    $('hint').textContent = 'מאמת ' + text + '...';
+  }
+}
+
+function stopCamera() {
+  if (scanner && scanning) scanner.stop().catch(() => {});
+  scanning = false; $('camBtn').textContent = '📷 הפעלת מצלמה';
+}
+
+$('camBtn').addEventListener('click', () => {
+  if (scanning) { stopCamera(); return; }
+  $('camErr').textContent = '';
+  if (typeof Html5Qrcode === 'undefined') { $('camErr').textContent = 'ספריית הסריקה לא נטענה - בדקו אינטרנט'; return; }
+  $('camBtn').disabled = true;
+  try {
+    scanner = scanner || new Html5Qrcode('reader', {
+      formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+    scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: (w, h) => ({ width: Math.floor(w * 0.9), height: Math.max(60, Math.floor(Math.min(h * 0.4, 160))) }) },
+      onDecode, () => {}
+    ).then(() => {
+      scanning = true; $('camBtn').disabled = false; $('camBtn').textContent = '⏹ עצירת מצלמה';
+      $('hint').textContent = 'כוונו את הברקוד למסגרת';
+    }).catch(camError);
+  } catch (e) { camError(e); }
+});
+function camError(e) {
+  $('camBtn').disabled = false;
+  $('camErr').textContent = 'המצלמה לא נפתחה: ' + ((e && (e.name || '') + ' ' + (e.message || e)) || '') + '\n' + deviceName();
+}
+
+// ---- Start ----
+if (user) showMain();
+</script>
+</body>
+</html>
