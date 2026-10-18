@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ספירת מלאי">
-<title>ספירת מלאי - בדיקה</title>
+<title>ספירת מלאי</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -14,44 +14,70 @@
   :root {
     --bg: #F5F4F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.10);
     --text: #1A1A18; --text2: #6B6B65; --hint: #A8A8A0;
-    --green: #2E7D32; --green-bg: #EAF3DE; --amber: #B26A00; --amber-bg: #FAEEDA;
-    --red: #B3261E; --red-bg: #FDECEA; --radius: 16px; --radius-sm: 10px;
+    --green: #2E7D32; --blue: #1565C0; --amber: #B26A00; --red: #B3261E; --purple: #6A1B9A;
+    --radius: 16px; --radius-sm: 10px;
   }
   html, body { background: var(--bg); font-family: 'Heebo', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
-  .page { max-width: 480px; margin: 0 auto; padding: 1rem 1rem 3rem; }
-  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; }
+  .page { max-width: 560px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+  .header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 1rem; }
   .header h1 { font-size: 22px; font-weight: 700; }
-  .who { font-size: 13px; color: var(--text2); }
+  .who { font-size: 13px; color: var(--text2); text-align: left; }
   .who a { color: var(--text2); }
+  .nav { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .nav button { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface);
+                font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer; }
+  .nav button.on { background: var(--text); color: #fff; }
   .bar { position: sticky; top: 0; z-index: 10; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
          padding: 8px 12px; margin-bottom: 1rem; font-size: 14px; display: flex; justify-content: space-between; gap: 8px; }
-  .bar.fail { background: var(--red-bg); border-color: var(--red); color: var(--red); font-weight: 700; }
+  .bar.fail { background: #FDECEA; border-color: var(--red); color: var(--red); font-weight: 700; }
   .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
   .label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
+  .muted { color: var(--text2); font-size: 14px; }
   .row { display: flex; gap: 8px; }
-  input { flex: 1; min-width: 0; width: 100%; font-family: inherit; font-size: 24px; font-weight: 500; padding: 10px 12px;
-          border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; }
+  input[type=text], input[type=password], input:not([type]) { flex: 1; min-width: 0; width: 100%; font-family: inherit; font-size: 22px; font-weight: 500;
+          padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; }
   input.num { text-align: center; letter-spacing: 4px; direction: ltr; }
   input:focus { border-color: rgba(0,0,0,0.35); }
   .btn { padding: 12px 18px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: inherit;
          font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .btn.wide { width: 100%; }
+  .btn.light { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn.danger { background: var(--red); }
   .btn:disabled { opacity: .5; }
   .stack > * + * { margin-top: 10px; }
   #reader { width: 100%; margin-top: 10px; border-radius: var(--radius-sm); overflow: hidden; }
   .hint { font-size: 13px; color: var(--text2); margin-top: 8px; min-height: 18px; }
-  .err { color: var(--red); font-size: 13px; margin-top: 8px; white-space: pre-wrap; }
-  ul { list-style: none; }
-  li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid #eee; font-size: 15px; }
-  li .num { font-weight: 700; direction: ltr; letter-spacing: 2px; font-size: 17px; }
-  li .st { text-align: left; font-size: 13px; }
-  li.ok .st { color: var(--green); } li.dup .st { color: var(--amber); } li.bad .st { color: var(--red); } li.wait .st { color: var(--text2); }
+  .err { color: var(--red); font-size: 14px; margin-top: 8px; white-space: pre-wrap; }
+  ul.recent { list-style: none; }
+  ul.recent li { display: grid; grid-template-columns: auto 1.5em 1fr auto; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid #eee; font-size: 14px; }
+  .n { font-weight: 700; direction: ltr; letter-spacing: 2px; font-size: 17px; }
+  .k-ok { color: var(--green); } .k-info { color: var(--blue); } .k-bad { color: var(--red); } .k-unknown { color: var(--purple); } .k-dup { color: var(--amber); }
+  .save { font-size: 12px; color: var(--text2); text-align: left; }
+  .save.fail { color: var(--red); font-weight: 700; }
   #overlay { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
              color: #fff; z-index: 1000; text-align: center; padding: 20px; pointer-events: none; }
   #overlay .big { font-size: 68px; font-weight: 700; direction: ltr; letter-spacing: 6px; }
   #overlay .msg { font-size: 30px; font-weight: 700; margin-top: 8px; }
   #overlay .sub { font-size: 18px; margin-top: 8px; }
-  #overlay.ok { background: rgba(46,125,50,.93); } #overlay.dup { background: rgba(178,106,0,.95); } #overlay.bad { background: rgba(179,38,30,.95); }
+  #overlay.ok { background: rgba(46,125,50,.93); } #overlay.info { background: rgba(21,101,192,.93); }
+  #overlay.bad { background: rgba(179,38,30,.95); } #overlay.unknown { background: rgba(106,27,154,.95); } #overlay.dup { background: rgba(178,106,0,.95); }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .tile { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 6px; text-align: center; }
+  .tile b { display: block; font-size: 22px; }
+  .tile span { font-size: 12px; color: var(--text2); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chip { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); font-family: inherit; font-size: 14px; cursor: pointer; }
+  .chip.on { background: var(--text); color: #fff; }
+  .tablewrap { overflow-x: auto; max-height: 60vh; overflow-y: auto; border: 1px solid #eee; border-radius: var(--radius-sm); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid #eee; text-align: right; white-space: nowrap; }
+  th { background: var(--bg); position: sticky; top: 0; font-weight: 500; }
+  td.n { font-size: 14px; letter-spacing: 1px; }
+  .warn { color: var(--amber); font-weight: 700; }
+  .choice { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; font-size: 15px; }
+  .choice input { margin-top: 4px; width: 18px; height: 18px; }
+  .kv { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; }
   .hidden { display: none !important; }
 </style>
 </head>
@@ -62,42 +88,89 @@
     <div class="who" id="who"></div>
   </div>
 
-  <!-- Sign-in -->
+  <!-- Sign in -->
   <div class="card stack" id="setup">
     <div>
-      <label class="label" for="nameIn">שם הסורק/ת</label>
-      <input id="nameIn" autocomplete="off">
+      <label class="label" for="nameIn">שם</label>
+      <input id="nameIn" type="text" autocomplete="off">
     </div>
     <div>
       <label class="label" for="pinIn">קוד כניסה</label>
       <input id="pinIn" class="num" type="password" inputmode="numeric" autocomplete="off">
     </div>
-    <button class="btn wide" id="startBtn">התחלה</button>
+    <button class="btn wide" id="startBtn">כניסה</button>
     <div class="err" id="setupErr"></div>
   </div>
 
-  <!-- Scanning -->
-  <div id="main" class="hidden">
-    <div class="bar" id="bar"><span id="barText">הכול נשמר ✓</span><span id="barMs"></span></div>
+  <div class="nav hidden" id="nav">
+    <button id="navScan" class="on">סריקה</button>
+    <button id="navMgr">ניהול ודוחות</button>
+  </div>
+
+  <!-- ===== Scanning ===== -->
+  <div id="scanView" class="hidden">
+    <div class="card" id="scanMsg"></div>
+    <div id="scanArea" class="hidden">
+      <div class="bar" id="bar"><span id="barText"></span><span id="barMs"></span></div>
+      <div class="card">
+        <label class="label" for="typed">הקלדת מספר פאה</label>
+        <form id="typeForm" class="row">
+          <input id="typed" class="num" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="12345">
+          <button class="btn" type="submit">שמירה</button>
+        </form>
+      </div>
+      <div class="card">
+        <button class="btn wide" id="camBtn">📷 הפעלת מצלמה</button>
+        <div id="reader"></div>
+        <div class="hint" id="hint"></div>
+        <div class="err" id="camErr"></div>
+      </div>
+      <div class="card">
+        <label class="label">נקלטו לאחרונה במכשיר הזה</label>
+        <ul class="recent" id="recent"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Manager ===== -->
+  <div id="mgrView" class="hidden">
+    <div class="card">
+      <h2>ספירה נוכחית</h2>
+      <div id="stInfo" class="muted"></div>
+      <div id="startBox" class="hidden stack" style="margin-top:10px">
+        <label class="choice"><input type="radio" name="sttype" value="Inventory" checked>
+          <span><b>ספירת מלאי</b><br><span class="muted">כולל פאות בקונסיגנציה</span></span></label>
+        <label class="choice"><input type="radio" name="sttype" value="Accounting">
+          <span><b>ספירה חשבונאית</b><br><span class="muted">בלי קונסיגנציה (לא בבעלותנו)</span></span></label>
+        <button class="btn wide light" id="checkBtn">1. בדיקת הנתונים מהגיליון</button>
+        <div id="importInfo"></div>
+        <button class="btn wide hidden" id="freezeBtn">2. הקפאה ופתיחת ספירה</button>
+      </div>
+      <button class="btn wide danger hidden" id="closeBtn" style="margin-top:12px">סגירת הספירה</button>
+      <div class="err" id="mgrErr"></div>
+    </div>
+
+    <div class="card hidden" id="progressCard">
+      <h2>התקדמות <span class="muted" id="updated"></span></h2>
+      <div class="tiles" id="tiles"></div>
+      <div id="byPerson" class="muted" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card hidden" id="reportCard">
+      <h2>דוחות</h2>
+      <div class="chips" id="chips"></div>
+      <div class="muted" id="reportNote" style="margin-bottom:8px"></div>
+      <div class="tablewrap"><table id="reportTable"></table></div>
+      <button class="btn wide light" id="xlsBtn" style="margin-top:10px">⬇ הורדה לאקסל (כל הדוחות)</button>
+    </div>
 
     <div class="card">
-      <label class="label" for="typed">הקלדת מספר פאה</label>
-      <form id="typeForm" class="row">
-        <input id="typed" class="num" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="12345">
-        <button class="btn" type="submit">שמירה</button>
+      <h2>חיפוש פאה</h2>
+      <form id="lookupForm" class="row">
+        <input id="lookupIn" class="num" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="12345">
+        <button class="btn" type="submit">חיפוש</button>
       </form>
-    </div>
-
-    <div class="card">
-      <button class="btn wide" id="camBtn">📷 הפעלת מצלמה</button>
-      <div id="reader"></div>
-      <div class="hint" id="hint"></div>
-      <div class="err" id="camErr"></div>
-    </div>
-
-    <div class="card">
-      <label class="label">נקלטו לאחרונה</label>
-      <ul id="recent"></ul>
+      <div id="lookupOut" style="margin-top:10px"></div>
     </div>
   </div>
 </div>
@@ -105,21 +178,43 @@
 <div id="overlay"><div class="big" id="ovNum"></div><div class="msg" id="ovMsg"></div><div class="sub" id="ovSub"></div></div>
 
 <script>
-// ---- Settings ----
+// ================================================================ settings
 const API_URL = 'https://script.google.com/macros/s/AKfycby5Ng_zxDzsSuFG3d1yht8s8AYPthxA3VL4jDjCBgiPPuqhcEGJpSamSSDlncW9X84q/exec';   // the Apps Script /exec link
 const VALID = /^[1-9]\d{4}$/;
+const G = { IN: 'In store', CONSIGN: 'Consignment', FIX: 'Fix-Return', OUT: 'Not in store' };
+const GROUP_HE = { 'In store': 'בחנות', 'Consignment': 'קונסיגנציה', 'Fix-Return': 'בתיקון', 'Not in store': 'לא בחנות' };
+const RESULT_HE = {
+  ok: 'תקין', ok_consign: 'תקין (קונסיגנציה)', problem: 'נסרקה - לא במלאי', fix_found: 'בתיקון - נמצאה בחנות',
+  unknown: 'מספר לא מוכר', missing: 'חסרה', missing_consign: 'חסרה (קונסיגנציה)', fix_away: 'בתיקון - לא בחנות',
+  consign_excluded: 'קונסיגנציה - לא נספרת'
+};
+const METHOD_HE = { scanned: 'סריקה', typed: 'הקלדה' };
+// Result labels as stored (in English) in the Results tab
+const HISTORY_HE = {
+  'OK': RESULT_HE.ok, 'OK (consignment)': RESULT_HE.ok_consign, 'Problem - scanned but not in stock': RESULT_HE.problem,
+  'Fix-Return - found in store': RESULT_HE.fix_found, 'Unknown number': RESULT_HE.unknown, 'Missing': RESULT_HE.missing,
+  'Missing (consignment)': RESULT_HE.missing_consign, 'Fix-Return - away': RESULT_HE.fix_away, 'Consignment - not counted': RESULT_HE.consign_excluded
+};
 
-// ---- Storage on this device (scans waiting to be saved survive closing the page) ----
+// ================================================================ state
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 };
-let user  = store.get('st_user', null);   // { name, pin }
+let user = store.get('st_user', null);    // { name, pin, role }
 let queue = store.get('st_queue', []);    // captures not yet confirmed by the server
-const known = {};                         // wig number -> { by, time } already counted
-const rows  = {};                         // client id -> list row on screen
+let stocktake = null;                     // current stocktake info from the server
+let snap = null;                          // frozen list: { id, type, statuses: [[name, group, he]], data: { wig: index } }
+let known = {};                           // wig -> { by, time } already counted in this stocktake
+const rows = {};                          // client id -> row on screen
 const $ = id => document.getElementById(id);
 
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  if (props) Object.assign(e, props);
+  kids.forEach(k => e.append(k));
+  return e;
+}
 function deviceName() {
   const ua = navigator.userAgent;
   const dev = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'iPad'
@@ -127,19 +222,17 @@ function deviceName() {
   const br = /CriOS|Chrome/.test(ua) ? 'Chrome' : /FxiOS|Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Browser';
   return dev + ' / ' + br;
 }
-function timeNow() { return new Date().toTimeString().slice(0, 8); }
+function timeNow() { return new Date().toTimeString().slice(0, 5); }
 
 async function api(payload) {
   // text/plain body = no CORS preflight, which Apps Script can't answer
-  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ pin: user && user.pin }, payload)) });
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ pin: user && user.pin, by: user && user.name }, payload)) });
   return res.json();
 }
 
-// ---- Feedback: colour, sound, vibration ----
+// ================================================================ feedback
 let audioCtx = null;
-function unlockAudio() {
-  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) {}
-}
+function unlockAudio() { try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) {} }
 document.addEventListener('click', unlockAudio, true);
 document.addEventListener('keydown', unlockAudio, true);
 
@@ -149,56 +242,169 @@ function tone(freq, start, len, type) {
   o.connect(g); g.connect(audioCtx.destination);
   o.start(audioCtx.currentTime + start); o.stop(audioCtx.currentTime + start + len);
 }
-function feedback(kind) {
+function sound(kind) {
   try {
-    if (audioCtx) {
-      if (kind === 'ok') tone(880, 0, 0.12);
-      else if (kind === 'dup') { tone(660, 0, 0.15); tone(660, 0.25, 0.15); }
-      else tone(220, 0, 0.5, 'square');
-    }
+    if (!audioCtx) return;
+    if (kind === 'ok' || kind === 'info') tone(880, 0, 0.12);
+    else if (kind === 'dup') { tone(660, 0, 0.15); tone(660, 0.25, 0.15); }
+    else { tone(220, 0, 0.5, 'square'); }
   } catch (e) {}
-  if (navigator.vibrate) navigator.vibrate(kind === 'ok' ? 100 : [200, 100, 200]);
+  if (navigator.vibrate) navigator.vibrate(kind === 'ok' || kind === 'info' ? 100 : [200, 100, 200]);
 }
-
 let ovTimer = null;
 function flash(kind, num, msg, sub) {
   const ov = $('overlay');
   ov.className = kind; ov.style.display = 'flex';
   $('ovNum').textContent = num; $('ovMsg').textContent = msg; $('ovSub').textContent = sub || '';
   clearTimeout(ovTimer);
-  ovTimer = setTimeout(() => { ov.style.display = 'none'; }, kind === 'ok' ? 800 : 2500);
-  feedback(kind);
+  ovTimer = setTimeout(() => { ov.style.display = 'none'; }, kind === 'ok' || kind === 'info' ? 800 : 2500);
+  sound(kind);
+}
+
+// ================================================================ sign in / views
+$('startBtn').addEventListener('click', async () => {
+  const name = $('nameIn').value.trim(), pin = $('pinIn').value.trim();
+  if (!name || !pin) { $('setupErr').textContent = 'יש למלא שם וקוד'; return; }
+  $('startBtn').disabled = true; $('setupErr').textContent = 'בודק...';
+  user = { name, pin };
+  try {
+    const res = await api({ action: 'ping' });
+    if (!res.ok) { user = null; $('setupErr').textContent = res.error === 'pin' ? 'קוד שגוי' : 'שגיאה: ' + (res.message || res.error); return; }
+    user.role = res.role;
+    store.set('st_user', user);
+    $('setupErr').textContent = '';
+    showApp(res.stocktake);
+  } catch (e) {
+    user = null; $('setupErr').textContent = 'אין חיבור לשרת. בדקו אינטרנט ונסו שוב.';
+  } finally { $('startBtn').disabled = false; }
+});
+
+function showApp(st) {
+  $('setup').classList.add('hidden');
+  $('who').textContent = '';
+  $('who').append(user.name + (user.role === 'manager' ? ' (מנהל/ת)' : '') + ' · ');
+  $('who').append(el('a', { href: '#', textContent: 'יציאה', onclick: e => { e.preventDefault(); signOut(''); } }));
+  $('nav').classList.toggle('hidden', user.role !== 'manager');
+  setStocktake(st);
+  showView('scan');
+  refreshKnown(); flush();
+}
+
+function signOut(msg) {
+  user = null; store.set('st_user', null);
+  stopCamera();
+  ['scanView', 'mgrView', 'nav'].forEach(id => $(id).classList.add('hidden'));
+  $('setup').classList.remove('hidden');
+  $('who').textContent = ''; $('setupErr').textContent = msg || '';
+}
+
+let view = 'scan';
+function showView(v) {
+  view = v;
+  $('scanView').classList.toggle('hidden', v !== 'scan');
+  $('mgrView').classList.toggle('hidden', v !== 'mgr');
+  $('navScan').classList.toggle('on', v === 'scan');
+  $('navMgr').classList.toggle('on', v === 'mgr');
+  if (v === 'mgr') { stopCamera(); loadReport(); }
+}
+$('navScan').onclick = () => showView('scan');
+$('navMgr').onclick = () => showView('mgr');
+
+// Called whenever the server tells us which stocktake is current.
+async function setStocktake(st) {
+  stocktake = st;
+  const open = st && st.status === 'Open';
+  if (!open) {
+    stopCamera();
+    $('scanArea').classList.add('hidden');
+    $('scanMsg').classList.remove('hidden');
+    $('scanMsg').textContent = 'אין ספירה פתוחה כרגע.' + (user && user.role === 'manager' ? ' אפשר לפתוח ספירה בלשונית "ניהול ודוחות".' : ' יש לבקש ממנהל/ת לפתוח ספירה.');
+    return;
+  }
+  if (snap && snap.id === st.id) { showScanArea(); return; }
+  known = {};   // new stocktake: nothing counted yet
+  const cached = store.get('st_snap', null);
+  if (cached && cached.id === st.id) { snap = cached; refreshKnown(); showScanArea(); return; }
+  $('scanArea').classList.add('hidden');
+  $('scanMsg').classList.remove('hidden');
+  $('scanMsg').textContent = 'טוען את רשימת המלאי...';
+  try {
+    const res = await api({ action: 'snapshot' });
+    if (!res.ok) throw new Error(res.error);
+    snap = { id: res.stocktake.id, type: res.stocktake.type, statuses: res.statuses, data: res.data };
+    store.set('st_snap', snap);
+    refreshKnown();
+    showScanArea();
+  } catch (e) {
+    $('scanMsg').textContent = 'טעינת רשימת המלאי נכשלה. בדקו חיבור ורעננו את הדף.';
+  }
+}
+function showScanArea() {
+  $('scanMsg').classList.add('hidden');
+  $('scanArea').classList.remove('hidden');
+  updateBar();
+}
+
+// Every 30 seconds: has a stocktake been opened or closed?
+async function poll() {
+  if (!user) return;
+  try {
+    const res = await api({ action: 'ping' });
+    if (!res.ok) { if (res.error === 'pin') signOut('הקוד שונה - יש להיכנס מחדש'); return; }
+    const was = stocktake ? stocktake.id + stocktake.status : '';
+    const now = res.stocktake ? res.stocktake.id + res.stocktake.status : '';
+    if (was !== now) { setStocktake(res.stocktake); if (view === 'mgr') loadReport(); }
+  } catch (e) {}
+}
+setInterval(poll, 30000);
+
+// ================================================================ capture
+// What the frozen list says about this wig: colour, message, detail.
+function classify(num) {
+  const i = snap.data[num];
+  if (i === undefined) return { kind: 'unknown', msg: 'מספר לא מוכר', sub: 'לא קיים ברשימת המלאי', short: 'לא מוכר' };
+  const [name, group, he] = snap.statuses[i];
+  if (group === G.IN) return { kind: 'ok', msg: 'נקלט ✓', sub: he, short: he };
+  if (group === G.CONSIGN) {
+    return snap.type === 'Accounting'
+      ? { kind: 'info', msg: 'קונסיגנציה', sub: 'לא נספרת בספירה חשבונאית', short: 'קונסיגנציה' }
+      : { kind: 'ok', msg: 'נקלט ✓', sub: 'קונסיגנציה', short: 'קונסיגנציה' };
+  }
+  if (group === G.FIX) return { kind: 'bad', msg: 'מסומנת: בתיקון', sub: 'הפאה בחנות אבל מסומנת Fix-Return', short: 'מסומנת בתיקון' };
+  return { kind: 'bad', msg: 'מסומנת: ' + he, sub: 'הפאה בחנות אבל לא במלאי לפי הגיליון', short: 'מסומנת ' + he };
 }
 
 function addRow(cid, num, method) {
-  const li = document.createElement('li');
-  const n = document.createElement('span'); n.className = 'num'; n.textContent = num;
-  const m = document.createElement('span'); m.className = 'st'; m.style.textAlign = 'right'; m.textContent = method === 'scanned' ? '📷' : '⌨️';
-  const s = document.createElement('span'); s.className = 'st';
-  li.append(n, m, s);
-  const ul = $('recent'); ul.insertBefore(li, ul.firstChild);
-  while (ul.children.length > 30) ul.removeChild(ul.lastChild);
-  rows[cid] = { li, st: s, num, shownDup: false };
-  return rows[cid];
+  const r = {
+    li: el('li'), num, shownDup: false,
+    res: el('span'), save: el('span', { className: 'save', textContent: '⏳ שומר' })
+  };
+  r.li.append(el('span', { className: 'n', textContent: num }), el('span', { textContent: method === 'scanned' ? '📷' : '⌨️' }), r.res, r.save);
+  const ul = $('recent'); ul.insertBefore(r.li, ul.firstChild);
+  while (ul.children.length > 40) ul.removeChild(ul.lastChild);
+  rows[cid] = r;
+  return r;
 }
-function setRow(row, cls, text) { if (row) { row.li.className = cls; row.st.textContent = text; } }
+function setRes(r, kind, text) { if (r) { r.res.className = 'k-' + kind; r.res.textContent = text; } }
+function setSave(r, text, fail) { if (r) { r.save.textContent = text; r.save.className = 'save' + (fail ? ' fail' : ''); } }
 
-// ---- Capture: instant answer on this device, saved in the background ----
 function capture(num, method) {
+  if (!snap || !stocktake || stocktake.status !== 'Open') return;
   if (!VALID.test(num)) { flash('bad', num || '-----', 'מספר לא תקין', 'מספר פאה = 5 ספרות'); return; }
   const cid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  const row = addRow(cid, num, method);
+  const r = addRow(cid, num, method);
   const prev = known[num];
   if (prev) {
-    row.shownDup = true;
-    setRow(row, 'dup', '⚠ כבר נספרה · ' + prev.by + ' ' + prev.time);
+    r.shownDup = true;
+    setRes(r, 'dup', 'כבר נספרה · ' + prev.by + ' ' + prev.time);
     flash('dup', num, 'כבר נספרה', 'ע"י ' + prev.by + ' בשעה ' + prev.time);
   } else {
     known[num] = { by: user.name, time: timeNow() };
-    setRow(row, 'wait', '⏳ שומר...');
-    flash('ok', num, 'נקלט ✓', method === 'scanned' ? 'סריקה' : 'הקלדה');
+    const c = classify(num);
+    setRes(r, c.kind, c.short);
+    flash(c.kind, num, c.msg, c.sub);
   }
-  queue.push({ cid, number: num, method });   // duplicates are sent too, so they get logged
+  queue.push({ cid, number: num, method, sid: stocktake.id });   // duplicates are sent too, so they get logged
   store.set('st_queue', queue);
   scheduleFlush(150);
 }
@@ -209,21 +415,24 @@ function scheduleFlush(ms) { clearTimeout(flushTimer); flushTimer = setTimeout(f
 async function flush() {
   if (inflight || !user || !queue.length) { updateBar(); return; }
   inflight = true; updateBar();
-  const batch = queue.slice(0, 25);
+  const sid = queue[0].sid;
+  const batch = queue.filter(q => q.sid === sid).slice(0, 25);
   const t0 = performance.now();
   let retry = false;
   try {
-    const res = await api({ action: 'save', by: user.name, device: deviceName(), items: batch });
+    const res = await api({ action: 'save', device: deviceName(), stocktakeId: sid, items: batch });
     if (!res.ok) {
-      if (res.error === 'pin') { signOut('הקוד שונה - הכניסו קוד חדש'); return; }
+      if (res.error === 'pin') { signOut('הקוד שונה - יש להיכנס מחדש'); return; }
       throw new Error(res.error);
     }
     lastMs = Math.round(performance.now() - t0);
     failCount = 0;
     const done = {};
-    res.results.forEach(r => { done[r.cid] = true; applyResult(r); });
+    let closed = false;
+    res.results.forEach(x => { done[x.cid] = true; if (applyResult(x)) closed = true; });
     queue = queue.filter(q => !done[q.cid]);
     store.set('st_queue', queue);
+    if (closed) { flash('bad', '', 'הספירה נסגרה', 'סריקות אחרונות לא נשמרו'); poll(); }
   } catch (e) {
     failCount++; retry = true;
   } finally {
@@ -232,83 +441,51 @@ async function flush() {
   }
 }
 
-function applyResult(r) {
-  const row = rows[r.cid];
-  if (r.status === 'saved') {
-    if (row && !row.shownDup) setRow(row, 'ok', '✓ נשמר ' + r.time);
-  } else if (r.status === 'duplicate') {
-    if (row) {
-      known[row.num] = { by: r.by, time: r.time };
-      if (!row.shownDup) {   // another phone counted it a moment earlier
-        row.shownDup = true;
-        flash('dup', row.num, 'כבר נספרה', 'ע"י ' + r.by + ' בשעה ' + r.time);
-      }
-      setRow(row, 'dup', '⚠ כבר נספרה · ' + r.by + ' ' + r.time);
+// Returns true when the stocktake turned out to be closed.
+function applyResult(x) {
+  const r = rows[x.cid];
+  if (x.status === 'saved') { setSave(r, '✓ נשמר ' + x.time); return false; }
+  if (x.status === 'duplicate') {
+    if (r) {
+      known[r.num] = { by: x.by, time: x.time };
+      if (!r.shownDup) { r.shownDup = true; flash('dup', r.num, 'כבר נספרה', 'ע"י ' + x.by + ' בשעה ' + x.time); }
+      setRes(r, 'dup', 'כבר נספרה · ' + x.by + ' ' + x.time);
+      setSave(r, 'נרשם ככפול');
     }
-  } else {
-    setRow(row, 'bad', '✗ לא תקין');
+    return false;
   }
+  if (x.status === 'closed') { setSave(r, '✗ לא נשמר - הספירה סגורה', true); return true; }
+  setSave(r, '✗ לא תקין', true);
+  return false;
 }
 
 function updateBar() {
-  const bar = $('bar');
   const n = queue.length;
   if (failCount >= 2 && n) {
-    bar.className = 'bar fail';
+    $('bar').className = 'bar fail';
     $('barText').textContent = 'אין חיבור לשרת · ' + n + ' ממתינות. יישמרו אוטומטית - לא לסגור את הדף';
   } else {
-    bar.className = 'bar';
+    $('bar').className = 'bar';
     $('barText').textContent = n ? '⏳ ממתינות לשמירה: ' + n : 'הכול נשמר ✓';
   }
-  $('barMs').textContent = lastMs ? 'שמירה אחרונה: ' + (lastMs / 1000).toFixed(1) + ' שנ׳' : '';
+  $('barMs').textContent = lastMs ? 'שמירה: ' + (lastMs / 1000).toFixed(1) + ' שנ׳' : '';
 }
 
 // Everything already counted (by any phone), so duplicates are caught instantly.
 async function refreshKnown() {
-  if (!user) return;
+  if (!user || !stocktake || stocktake.status !== 'Open') return;
   try {
     const res = await api({ action: 'list' });
-    if (res.ok) res.scans.forEach(s => { known[s[0]] = { by: s[1], time: s[2] }; });
+    if (!res.ok) return;
+    const fresh = {};
+    res.scans.forEach(s => { fresh[s[0]] = { by: s[1], time: s[2] }; });
+    queue.forEach(q => { if (!fresh[q.number] && known[q.number]) fresh[q.number] = known[q.number]; });   // not saved yet
+    known = fresh;
   } catch (e) {}
 }
 setInterval(refreshKnown, 15000);
 setInterval(() => { if (queue.length && !inflight) flush(); }, 10000);
 
-// ---- Sign in ----
-$('startBtn').addEventListener('click', async () => {
-  const name = $('nameIn').value.trim(), pin = $('pinIn').value.trim();
-  if (!name || !pin) { $('setupErr').textContent = 'יש למלא שם וקוד'; return; }
-  $('startBtn').disabled = true; $('setupErr').textContent = 'בודק...';
-  try {
-    user = { name, pin };
-    const res = await api({ action: 'ping' });
-    if (!res.ok) { user = null; $('setupErr').textContent = res.error === 'pin' ? 'קוד שגוי' : 'שגיאה: ' + res.error; return; }
-    store.set('st_user', user);
-    showMain();
-  } catch (e) {
-    user = null; $('setupErr').textContent = 'אין חיבור לשרת. בדקו אינטרנט ונסו שוב.';
-  } finally { $('startBtn').disabled = false; }
-});
-
-function showMain() {
-  $('setup').classList.add('hidden'); $('main').classList.remove('hidden');
-  $('who').textContent = '';
-  $('who').append(user.name + ' · ');
-  const a = document.createElement('a'); a.href = '#'; a.textContent = 'החלפה';
-  a.onclick = e => { e.preventDefault(); signOut(''); };
-  $('who').append(a);
-  updateBar(); refreshKnown(); flush();
-  $('typed').focus();
-}
-
-function signOut(msg) {
-  user = null; store.set('st_user', null);
-  stopCamera();
-  $('main').classList.add('hidden'); $('setup').classList.remove('hidden');
-  $('who').textContent = ''; $('setupErr').textContent = msg || '';
-}
-
-// ---- Typing ----
 $('typeForm').addEventListener('submit', e => {
   e.preventDefault();
   const v = $('typed').value.trim();
@@ -317,7 +494,8 @@ $('typeForm').addEventListener('submit', e => {
   $('typed').focus();
 });
 
-// ---- Camera: accept only when the same number is read twice within 2 seconds ----
+// ================================================================ camera
+// A read is accepted only when the same number is read twice within 2 seconds.
 let scanner = null, scanning = false, candidate = null, candidateTime = 0, lastAccepted = null, lastAcceptedTime = 0;
 
 function onDecode(text) {
@@ -334,12 +512,10 @@ function onDecode(text) {
     $('hint').textContent = 'מאמת ' + text + '...';
   }
 }
-
 function stopCamera() {
   if (scanner && scanning) scanner.stop().catch(() => {});
   scanning = false; $('camBtn').textContent = '📷 הפעלת מצלמה';
 }
-
 $('camBtn').addEventListener('click', () => {
   if (scanning) { stopCamera(); return; }
   $('camErr').textContent = '';
@@ -366,8 +542,228 @@ function camError(e) {
   $('camErr').textContent = 'המצלמה לא נפתחה: ' + ((e && (e.name || '') + ' ' + (e.message || e)) || '') + '\n' + deviceName();
 }
 
-// ---- Start ----
-if (user) showMain();
+// ================================================================ manager: open / close
+function selectedType() { return document.querySelector('input[name=sttype]:checked').value; }
+const TYPE_HE = { Inventory: 'ספירת מלאי (כולל קונסיגנציה)', Accounting: 'ספירה חשבונאית (בלי קונסיגנציה)' };
+
+function renderStInfo(st) {
+  const open = st && st.status === 'Open';
+  $('stInfo').textContent = !st ? 'עדיין לא בוצעה ספירה.'
+    : open ? 'פתוחה: ' + TYPE_HE[st.type] + ' · הוקפאה ' + st.started + ' ע"י ' + st.startedBy
+    : 'אין ספירה פתוחה. הספירה האחרונה (' + st.started + ') נסגרה ' + st.closed + '. הדוחות למטה הם שלה.';
+  $('startBox').classList.toggle('hidden', open);
+  $('closeBtn').classList.toggle('hidden', !open);
+}
+
+$('checkBtn').addEventListener('click', async () => {
+  $('checkBtn').disabled = true; $('freezeBtn').classList.add('hidden'); $('mgrErr').textContent = '';
+  const box = $('importInfo'); box.textContent = 'בודק...';
+  try {
+    const res = await api({ action: 'm_status' });
+    if (!res.ok) throw new Error(res.message || res.error);
+    box.textContent = '';
+    const im = res.import;
+    if (im.error) {
+      box.append(el('div', { className: 'err', textContent: im.error === 'import_error'
+        ? 'הנתונים מהגיליון הראשי לא נטענו (' + im.detail + '). פתחו את גיליון הספירה, לשונית Import, אשרו גישה אם מתבקש, והמתינו שהנתונים יופיעו.'
+        : 'לשונית Import ריקה. יש להגדיר את ה-IMPORTRANGE (ראו הוראות).' }));
+      return;
+    }
+    const withC = selectedType() === 'Inventory';
+    const expected = (im.groups[G.IN] || 0) + (withC ? (im.groups[G.CONSIGN] || 0) : 0);
+    box.append(
+      kv('פאות בגיליון', im.rows),
+      kv('צפויות בחנות בספירה הזאת', expected),
+      ...Object.keys(im.groups).map(g => kv('  ' + (GROUP_HE[g] || g), im.groups[g])),
+      kv('מספרי הפאות האחרונים ברשימה', im.last.join(', ')),
+      el('div', { className: 'muted', textContent: 'אם הוספתם פאות בדקות האחרונות ומספריהן לא מופיעים למעלה, פתחו את גיליון הספירה לרגע כדי שהנתונים יתעדכנו, ובדקו שוב.' })
+    );
+    $('freezeBtn').classList.remove('hidden');
+  } catch (e) {
+    box.textContent = ''; $('mgrErr').textContent = 'שגיאה: ' + e.message;
+  } finally { $('checkBtn').disabled = false; }
+});
+function kv(k, v) { return el('div', { className: 'kv' }, el('span', { textContent: k }), el('b', { textContent: String(v) })); }
+
+$('freezeBtn').addEventListener('click', async () => {
+  if (!confirm('להקפיא את המלאי עכשיו ולפתוח ' + TYPE_HE[selectedType()] + '?')) return;
+  $('freezeBtn').disabled = true; $('mgrErr').textContent = '';
+  try {
+    const res = await api({ action: 'm_start', type: selectedType() });
+    if (!res.ok) throw new Error(res.error === 'already_open' ? 'כבר יש ספירה פתוחה' : (res.detail || res.message || res.error));
+    $('importInfo').textContent = ''; $('freezeBtn').classList.add('hidden');
+    await setStocktake(res.stocktake);
+    loadReport();
+  } catch (e) { $('mgrErr').textContent = 'הפתיחה נכשלה: ' + e.message; }
+  finally { $('freezeBtn').disabled = false; }
+});
+
+$('closeBtn').addEventListener('click', async () => {
+  if (queue.length) { alert('יש סריקות שעדיין לא נשמרו במכשיר הזה. המתינו שיישמרו.'); return; }
+  if (!confirm('לסגור את הספירה? אחרי הסגירה אי אפשר להמשיך לסרוק. ודאו שכל הסורקים סיימו.')) return;
+  $('closeBtn').disabled = true; $('mgrErr').textContent = '';
+  try {
+    const res = await api({ action: 'm_close' });
+    if (!res.ok) throw new Error(res.message || res.error);
+    await setStocktake(res.stocktake);
+    loadReport();
+  } catch (e) { $('mgrErr').textContent = 'הסגירה נכשלה: ' + e.message; }
+  finally { $('closeBtn').disabled = false; }
+});
+
+// ================================================================ manager: progress and reports
+let report = null, reportKey = 'problem';
+const REPORTS = [
+  { key: 'problem', title: 'נסרקו אך לא במלאי', f: r => r[1] === 'problem' || r[1] === 'fix_found' },
+  { key: 'missing', title: 'חסרות', f: r => r[1] === 'missing' || r[1] === 'missing_consign' },
+  { key: 'unknown', title: 'מספרים לא מוכרים', f: r => r[1] === 'unknown' },
+  { key: 'fix', title: 'בתיקון', f: r => r[1] === 'fix_away' || r[1] === 'fix_found' },
+  { key: 'consign', title: 'קונסיגנציה', f: r => ['ok_consign', 'missing_consign', 'consign_excluded'].includes(r[1]) },
+  { key: 'typed', title: 'הוקלדו ידנית', f: r => r[6] === 'typed' },
+  { key: 'ok', title: 'תקינות', f: r => r[1] === 'ok' || r[1] === 'ok_consign' },
+  { key: 'dups', title: 'סריקות כפולות', dups: true }
+];
+const ROW_HEAD = ['מספר פאה', 'תוצאה', 'סטטוס בהקפאה', 'סטטוס כעת', 'נסרקה', 'ע"י', 'אופן'];
+const DUP_HEAD = ['זמן', 'מספר פאה', 'נסרקה שוב ע"י', 'נספרה לראשונה ע"י', 'בשעה', 'אופן'];
+
+function stHe(s) {
+  if (!s) return '';
+  const m = report && report.statuses[s.toLowerCase()];
+  return m ? m[0] : s;
+}
+function stGroup(s) {
+  const m = report && report.statuses[String(s || '').toLowerCase()];
+  return m ? m[1] : G.OUT;
+}
+// A row as text cells; marks wigs whose status changed since the freeze (e.g. sold during the count).
+function rowCells(r) {
+  const changed = r[3] && r[2] && r[3] !== r[2];
+  return [r[0], RESULT_HE[r[1]] || r[1], stHe(r[2]), (changed ? '⚠ ' : '') + stHe(r[3] || (r[1] === 'unknown' ? '' : 'לא בגיליון')),
+          r[4], r[5], METHOD_HE[r[6]] || ''];
+}
+function dupCells(d) { return [d[0], d[1], d[2], d[3], d[4], METHOD_HE[d[5]] || d[5]]; }
+
+let reportTimer = null;
+async function loadReport() {
+  clearTimeout(reportTimer);
+  try {
+    const res = await api({ action: 'm_report' });
+    if (!res.ok) throw new Error(res.message || res.error);
+    report = res;
+    renderStInfo(res.stocktake);
+    renderReport();
+  } catch (e) { $('mgrErr').textContent = 'טעינת הדוחות נכשלה: ' + e.message; }
+  if (view === 'mgr' && report && report.stocktake && report.stocktake.status === 'Open') reportTimer = setTimeout(loadReport, 30000);
+}
+
+function renderReport() {
+  const has = !!(report && report.stocktake);
+  $('progressCard').classList.toggle('hidden', !has);
+  $('reportCard').classList.toggle('hidden', !has);
+  if (!has) return;
+  const c = report.counts;
+  $('updated').textContent = '· עודכן ' + timeNow();
+  $('tiles').textContent = '';
+  [['צפויות', c.expected], ['נסרקו', c.scanned], ['תקינות', c.ok], ['חסרות', c.missing],
+   ['לא במלאי', c.problems], ['לא מוכרות', c.unknown], ['כפולות', c.dups], ['הוקלדו', c.typed]]
+    .forEach(([t, v]) => $('tiles').append(el('div', { className: 'tile' }, el('b', { textContent: v }), el('span', { textContent: t }))));
+  $('byPerson').textContent = Object.keys(report.byPerson).length
+    ? 'לפי סורק/ת: ' + Object.entries(report.byPerson).map(([k, v]) => k + ' ' + v).join(' · ') : '';
+
+  $('chips').textContent = '';
+  REPORTS.forEach(rep => {
+    const n = rep.dups ? report.dups.length : report.rows.filter(rep.f).length;
+    $('chips').append(el('button', { className: 'chip' + (rep.key === reportKey ? ' on' : ''), textContent: rep.title + ' (' + n + ')',
+      onclick: () => { reportKey = rep.key; renderReport(); } }));
+  });
+
+  const rep = REPORTS.find(x => x.key === reportKey);
+  const head = rep.dups ? DUP_HEAD : ROW_HEAD;
+  let data = rep.dups ? report.dups.map(dupCells) : report.rows.filter(rep.f).sort((a, b) => a[0] - b[0]).map(rowCells);
+  const total = data.length;
+  data = data.slice(0, 500);
+  $('reportNote').textContent = total > 500 ? 'מוצגות 500 שורות ראשונות מתוך ' + total + '. הרשימה המלאה באקסל.'
+    : reportKey === 'missing' ? 'סימן ⚠ = הסטטוס השתנה מאז ההקפאה (למשל נמכרה במהלך הספירה).' : '';
+  const t = $('reportTable'); t.textContent = '';
+  t.append(el('tr', null, ...head.map(h => el('th', { textContent: h }))));
+  if (!data.length) t.append(el('tr', null, el('td', { textContent: 'אין שורות', colSpan: head.length })));
+  data.forEach(cells => t.append(el('tr', null, ...cells.map((v, i) => el('td', { className: i === (rep.dups ? 1 : 0) ? 'n' : '', textContent: v == null ? '' : v })))));
+}
+
+$('xlsBtn').addEventListener('click', async () => {
+  if (!report) return;
+  $('xlsBtn').disabled = true;
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    const wb = XLSX.utils.book_new();
+    wb.Workbook = { Views: [{ RTL: true }] };
+    const st = report.stocktake, c = report.counts;
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['ספירה', st.id], ['סוג', TYPE_HE[st.type]], ['הוקפאה', st.started], ['ע"י', st.startedBy], ['נסגרה', st.closed || 'פתוחה'], [],
+      ['צפויות', c.expected], ['נסרקו', c.scanned], ['תקינות', c.ok], ['חסרות', c.missing], ['נסרקו אך לא במלאי', c.problems],
+      ['מספרים לא מוכרים', c.unknown], ['סריקות כפולות', c.dups], ['הוקלדו ידנית', c.typed]
+    ]), 'סיכום');
+    REPORTS.forEach(rep => {
+      const data = rep.dups ? report.dups.map(dupCells) : report.rows.filter(rep.f).sort((a, b) => a[0] - b[0]).map(rowCells);
+      const sheet = XLSX.utils.aoa_to_sheet([rep.dups ? DUP_HEAD : ROW_HEAD].concat(data));
+      XLSX.utils.book_append_sheet(wb, sheet, rep.title.slice(0, 31));
+    });
+    XLSX.writeFile(wb, 'ספירת-מלאי-' + st.id + '.xlsx');
+  } catch (e) { alert('ההורדה נכשלה: ' + e.message); }
+  finally { $('xlsBtn').disabled = false; }
+});
+function loadScript(src) {
+  if (window.XLSX) return Promise.resolve();
+  return new Promise((ok, fail) => { const s = el('script', { src, onload: ok, onerror: () => fail(new Error('לא ניתן לטעון')) }); document.head.append(s); });
+}
+
+// ================================================================ manager: lookup and undo
+$('lookupForm').addEventListener('submit', e => { e.preventDefault(); lookup($('lookupIn').value.trim()); });
+
+async function lookup(num) {
+  const out = $('lookupOut');
+  if (!VALID.test(num)) { out.textContent = 'מספר פאה = 5 ספרות'; return; }
+  out.textContent = 'מחפש...';
+  try {
+    const res = await api({ action: 'm_lookup', number: num });
+    if (!res.ok) throw new Error(res.message || res.error);
+    const he = s => { const m = s && res.statuses[s.toLowerCase()]; return m ? m[0] : (s || '-'); };
+    out.textContent = '';
+    out.append(el('div', { className: 'n', textContent: num, style: 'font-size:24px;margin-bottom:6px' }));
+    out.append(kv('סטטוס כעת בגיליון', res.live ? he(res.live) : 'לא נמצאה בגיליון'));
+    const cur = res.current;
+    if (cur) {
+      const open = cur.stocktake.status === 'Open';
+      out.append(kv((open ? 'בספירה הפתוחה' : 'בספירה האחרונה') + ' - סטטוס בהקפאה', cur.frozen ? he(cur.frozen) : 'לא ברשימה'));
+      out.append(kv('נסרקה', cur.scan ? cur.scan.time + ' · ' + cur.scan.by + ' · ' + (METHOD_HE[cur.scan.method] || '') : 'לא נסרקה'));
+      if (open && cur.scan) {
+        out.append(el('button', { className: 'btn light wide', textContent: 'ביטול הסריקה (נסרקה בטעות)', style: 'margin-top:8px',
+          onclick: () => undo(num) }));
+      }
+    }
+    out.append(el('div', { className: 'label', textContent: 'היסטוריית ספירות סגורות', style: 'margin-top:12px' }));
+    if (!res.history.length) out.append(el('div', { className: 'muted', textContent: 'לא הופיעה בספירות קודמות' }));
+    res.history.forEach(h => out.append(kv(h[1] + ' · ' + he(h[2]), (HISTORY_HE[h[3]] || h[3]) + (h[4] ? ' · ' + h[4] + ' ' + h[5] : ''))));
+  } catch (e) { out.textContent = 'החיפוש נכשל: ' + e.message; }
+}
+
+async function undo(num) {
+  const reason = prompt('סיבת הביטול (למשל: נסרקה בטעות, ברקוד שגוי):');
+  if (reason === null) return;
+  try {
+    const res = await api({ action: 'm_undo', number: num, reason });
+    if (!res.ok) throw new Error(res.error === 'not_scanned' ? 'הפאה לא נסרקה' : (res.message || res.error));
+    delete known[num];
+    await lookup(num);
+    loadReport();
+  } catch (e) { alert('הביטול נכשל: ' + e.message); }
+}
+
+// ================================================================ start
+if (user) {
+  showApp(null);
+  poll();
+}
 </script>
 </body>
 </html>
