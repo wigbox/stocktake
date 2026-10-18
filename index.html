@@ -281,13 +281,17 @@ $('startBtn').addEventListener('click', async () => {
 
 function showApp(st) {
   $('setup').classList.add('hidden');
+  showWho();
+  setStocktake(st);
+  showView('scan');
+  refreshKnown(); flush();
+}
+
+function showWho() {
   $('who').textContent = '';
   $('who').append(user.name + (user.role === 'manager' ? ' (מנהל/ת)' : '') + ' · ');
   $('who').append(el('a', { href: '#', textContent: 'יציאה', onclick: e => { e.preventDefault(); signOut(''); } }));
   $('nav').classList.toggle('hidden', user.role !== 'manager');
-  setStocktake(st);
-  showView('scan');
-  refreshKnown(); flush();
 }
 
 function signOut(msg) {
@@ -351,6 +355,11 @@ async function poll() {
   try {
     const res = await api({ action: 'ping' });
     if (!res.ok) { if (res.error === 'pin') signOut('הקוד שונה - יש להיכנס מחדש'); return; }
+    if (res.role !== user.role) {   // e.g. still signed in from an older version
+      user.role = res.role; store.set('st_user', user);
+      showWho();
+      if (user.role !== 'manager' && view === 'mgr') showView('scan');
+    }
     const was = stocktake ? stocktake.id + stocktake.status : '';
     const now = res.stocktake ? res.stocktake.id + res.stocktake.status : '';
     if (was !== now) { setStocktake(res.stocktake); if (view === 'mgr') loadReport(); }
