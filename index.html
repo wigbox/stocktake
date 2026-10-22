@@ -296,6 +296,7 @@ function showWho() {
 
 function signOut(msg) {
   user = null; store.set('st_user', null);
+  snap = null; stocktake = null;
   stopCamera();
   ['scanView', 'mgrView', 'nav'].forEach(id => $(id).classList.add('hidden'));
   $('setup').classList.remove('hidden');
@@ -325,8 +326,12 @@ async function setStocktake(st) {
     $('scanMsg').textContent = 'אין ספירה פתוחה כרגע.' + (user && user.role === 'manager' ? ' אפשר לפתוח ספירה בלשונית "ניהול ודוחות".' : ' יש לבקש ממנהל/ת לפתוח ספירה.');
     return;
   }
-  if (snap && snap.id === st.id) { showScanArea(); return; }
-  known = {};   // new stocktake: nothing counted yet
+  if (snap && snap.id === st.id && (snap.data || user.role !== 'manager')) { showScanArea(); return; }
+  if (!snap || snap.id !== st.id) known = {};   // new stocktake: nothing counted yet
+  if (user.role !== 'manager') {   // staff phones never receive the stock list
+    snap = { id: st.id, type: st.type, data: null };
+    refreshKnown(); showScanArea(); return;
+  }
   const cached = store.get('st_snap', null);
   if (cached && cached.id === st.id) { snap = cached; refreshKnown(); showScanArea(); return; }
   $('scanArea').classList.add('hidden');
@@ -370,6 +375,7 @@ setInterval(poll, 30000);
 // ================================================================ capture
 // What the frozen list says about this wig: colour, message, detail.
 function classify(num) {
+  if (!snap.data) return { kind: 'ok', msg: 'נקלט ✓', sub: '', short: 'נקלט' };
   const i = snap.data[num];
   if (i === undefined) return { kind: 'unknown', msg: 'מספר לא מוכר', sub: 'לא קיים ברשימת המלאי', short: 'לא מוכר' };
   const [name, group, he] = snap.statuses[i];
@@ -409,7 +415,8 @@ function capture(num, method) {
     flash('dup', num, 'כבר נספרה', 'ע"י ' + prev.by + ' בשעה ' + prev.time);
   } else {
     known[num] = { by: user.name, time: timeNow() };
-    const c = classify(num);
+    // Staff only need to know the wig was captured; managers also see what the frozen list says.
+    const c = user.role === 'manager' ? classify(num) : { kind: 'ok', msg: 'נקלט ✓', sub: METHOD_HE[method], short: 'נקלט' };
     setRes(r, c.kind, c.short);
     flash(c.kind, num, c.msg, c.sub);
   }
