@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recruitment Day Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&family=Assistant:wght@400;600&display=swap">
+<style>
+/* Layout: left rail of candidates, one working sheet on the right; rail collapses above the sheet on narrow screens */
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --ink:#1c2230; --muted:#5d6577; --faint:#8a91a1; --line:#dfe2e8;
+  --accent:#3b3f8f; --accent-soft:#e7e8f7; --accent-ink:#2a2d6e;
+  --ok:#1f7a4d; --ok-soft:#e3f3ea; --warn:#8a5a00; --warn-soft:#fbf0d9; --flag:#a8322d; --flag-soft:#fbe8e6;
+  --display:"Rubik",system-ui,sans-serif; --body:"Assistant","Rubik",system-ui,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14171e; --panel:#1c2029; --ink:#e8eaf0; --muted:#a3a9b8; --faint:#7b8292; --line:#2e3340;
+  --accent:#9da3f0; --accent-soft:#2a2d52; --accent-ink:#d6d9ff;
+  --ok:#6fd19e; --ok-soft:#173326; --warn:#e6b85c; --warn-soft:#3a2d12; --flag:#f08a83; --flag-soft:#3d1d1b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14171e; --panel:#1c2029; --ink:#e8eaf0; --muted:#a3a9b8; --faint:#7b8292; --line:#2e3340;
+  --accent:#9da3f0; --accent-soft:#2a2d52; --accent-ink:#d6d9ff;
+  --ok:#6fd19e; --ok-soft:#173326; --warn:#e6b85c; --warn-soft:#3a2d12; --flag:#f08a83; --flag-soft:#3d1d1b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:600;font-size:1.35rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.hdr-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.who{display:flex;white-space:nowrap;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)}
+.who input{width:150px}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:8px 12px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}.rail{position:static}}
+.rail{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+.rail h2,.sheet h2{font-family:var(--display);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:500;margin:0}
+.add{display:flex;gap:6px}
+.add input{flex:1;min-width:0}
+.list{display:flex;flex-direction:column;gap:2px;max-height:60vh;overflow:auto}
+.item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;background:none;color:inherit;font:inherit;text-align:start;width:100%}
+.item:hover{background:var(--bg)}
+.item.sel{background:var(--accent-soft);border-color:var(--accent)}
+.item .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.95rem}
+.item .rl{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.pill{font-size:.72rem;padding:2px 8px;border-radius:999px;white-space:nowrap;font-family:var(--display)}
+.p-notes{background:var(--warn-soft);color:var(--warn)}
+.p-ready{background:var(--accent-soft);color:var(--accent-ink)}
+.p-sent{background:var(--ok-soft);color:var(--ok)}
+.tally{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;font-variant-numeric:tabular-nums}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+input[type=text],input[type=tel],input[type=email],textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+textarea{min-height:58px;resize:vertical;line-height:1.4}
+input:focus,textarea:focus,button:focus-visible,.item:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.sec{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hint{font-size:.8rem;color:var(--faint)}
+.q{display:flex;flex-direction:column;gap:6px}
+.q .ql{font-size:.95rem;font-weight:600}
+.flags{display:flex;gap:8px;flex-wrap:wrap}
+.flag{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;color:var(--muted);background:none;font-family:inherit}
+.chip{display:inline-flex;align-items:center;font:inherit;font-size:.9rem;border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer;color:var(--ink);background:var(--bg)}
+.chip[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.flag[aria-pressed=true]{background:var(--flag-soft);color:var(--flag);border-color:var(--flag)}
+.rates{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.scale{display:flex;flex-direction:column;gap:6px}
+.scale .ends{display:flex;justify-content:space-between;font-size:.75rem;color:var(--faint)}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.b{font:inherit;font-family:var(--display);font-weight:500;min-width:40px;height:38px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.b:hover{border-color:var(--accent)}
+.b[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.rec .b[data-v="להתקדם"][aria-pressed=true]{background:var(--ok);border-color:var(--ok)}
+.rec .b[data-v="לא מתאימה"][aria-pressed=true]{background:var(--flag);border-color:var(--flag)}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.act-r{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-family:var(--display);font-size:.92rem;font-weight:500;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.btn.danger{color:var(--flag)}
+.btn.ghost{border-color:transparent;color:var(--muted)}
+.save{font-size:.82rem;color:var(--faint)}
+.empty{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:30px 6px}
+.empty h3{font-family:var(--display);font-weight:500;font-size:1.15rem;margin:0}
+.empty p{margin:0;color:var(--muted);max-width:52ch}
+.note{font-size:.82rem;color:var(--muted)}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));inset-inline-start:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:8px 14px;border-radius:8px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
+[dir=rtl] .toast{transform:translateX(50%)}
+.toast.on{opacity:1}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lang button{font:inherit;font-size:.85rem;border:0;background:var(--panel);color:var(--muted);padding:6px 10px;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+.pairs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pairs .lbl{font-size:.9rem;color:var(--muted);margin-inline-end:4px}
+.info{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:.9rem}
+.pick{display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:30px 6px}
+.pick h3{font-family:var(--display);font-weight:500;font-size:1.15rem;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div>
+      <h1 data-t="title">Recruitment day notes</h1>
+      <p class="sub" data-t="subtitle">Quick notes during interviews, then send each candidate to the official form.</p>
+    </div>
+    <div class="hdr-right">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-en" data-lang="en">English</button>
+        <button type="button" id="lang-he" data-lang="he">עברית</button>
+      </div>
+    </div>
+  </header>
+  <div class="pairs" id="pairs"></div>
+  <div class="banner" id="banner" hidden></div>
+  <div class="grid">
+    <aside class="rail">
+      <h2 data-t="candidates">Candidates</h2>
+      <button class="btn primary" type="button" id="newc" style="justify-content:center">+ <span data-t="newc">New candidate</span></button>
+      <div class="list" id="list"></div>
+      <div class="tally" id="tally"></div>
+    </aside>
+    <div class="sheet" id="sheet"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Paste the Apps Script web app URL between the quotes ===== */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2r9_Iya_4FjFSy8ErJQJ6PaYhKD2rctLWk2mE6TzmYftf-fkNu5RZlrXBKekbGNI2/exec";
+/* ================================================================ */
+
+(function(){
+const FORM_BASE="https://docs.google.com/forms/d/e/1FAIpQLSf7Y99nl21bvax0MYSZZgq7_aAOX55of3YEZlpTwhkd1igGAg/viewform?usp=pp_url";
+const E={interviewer:446981591,name:1698401477,phone:333120488,role:1381842934,exp:284370521,s1:596232455,s2:518160862,r1:324506026,r2:1509159271,r3:1206967900,rec:8467201,summary:489547150};
+const REC=["להתקדם","אולי","לא מתאימה"];
+const AVHE=["בוקר","אחר הצהריים","ערב","שישי","מוצ\"ש"];
+const PW=["1","2","3","4","5+"];
+const DEFAULT_CFG={pairs:["Miri & Daniella","Hadassa & Adina","Myriam & Aliza","Yonah & Nadine"],roles:["מזכירות","מענה"],
+  flags:[["קשה להבין אותה בדיבור","Hard to understand when speaking"],["תשובות קצרות או מעורפלות","Short or vague answers"],["לא מרגישה בנוח עם מחשב","Uncomfortable with computers"],["הגיעה באיחור או לא מוכנה","Late or unprepared"],["הזמינות לא מתאימה לצורך","Availability doesn't fit"],["שלילית לגבי עבודות קודמות","Negative about previous jobs"]].map(([he,en])=>({he,en}))};
+
+const T={
+en:{title:"Recruitment day notes",subtitle:"Quick notes during interviews, then send each candidate to the official form.",pairsLbl:"Interviewers:",pickH:"Choose your interviewer pair",pickP:"Tap your pair above. This device will remember it, and you can change it any time.",
+ candidates:"Candidates",newc:"New candidate",cand:"Candidate",roleOtherPh:"Which role?",other:"Other",
+ avail:"Availability",availHint:"Ask towards the end",av:["Morning","Afternoon","Evening","Friday","Motzash"],perWeek:"Times a week",hours:"Preferred hours",hoursPh:"From 4pm, not Sundays",eng:"English level",enga:"1 none",engb:"5 fluent",
+ emptyH:"Start your first interview",emptyP:"Press New candidate when she sits down. Type her name and phone first, then your notes.",
+ name:"Full name",role:"Roles she's interested in (pick any)",phone:"Phone",
+ also:"Also interviewed by another pair",alsoNotePh:"Short note, e.g. for which role",matchPre:"Also interviewed by",matchFor:"for",
+ during:"Notes",duringHint:"Keywords are enough",exp:"Experience, in brief",s1:"Something didn't work and she changed something to improve it",s2:"A mistake she made and what she did after",
+ gap:"In the 2-minute gap",gapHint:"Fill these first, while it's fresh",
+ r1:"Experience and skills fit",r1a:"1 negative",r1b:"5 excellent",r2:"Culture fit",r2a:"1 misfit",r2b:"5 exceptional",r3:"Self-confidence",r3a:"1 no",r3b:"5 yes",
+ rec:"Recommendation",recv:["Advance","Maybe","Not suitable"],otherph:"Your wording",summary:"Summary and notes",summaryph:"Anything else, and what you'd tell a colleague about her",
+ send:"Send to form",copy:"Copy notes",del:"Delete",delSure:"Click again to delete",next:"Next candidate",
+ sNotes:"Notes",sReady:"Ready",sSent:"Sent",saved:"Saved",saving:"Saving…",unsynced:"Not saved online yet, retrying",
+ sentNote:"Opened in the form. Check the answers and press Submit there.",sentAt:"Sent to form",unsend:"Mark as not sent",
+ tally:(a,b,c)=>`${a} candidates · ${b} ready · ${c} sent`,copied:"Notes copied",copyFail:"Select the text and copy it",
+ offline:"Can't reach the Google Sheet right now. Your notes are kept on this device and will save when the connection is back.",
+ notSetup:"Setup isn't finished: the Apps Script link hasn't been added to this page yet.",flagsFor:"Warning signs"},
+he:{title:"יום גיוס – ראיונות",subtitle:"הערות קצרות בזמן הראיון, ואחר כך שליחה של כל מועמדת לטופס הרשמי.",pairsLbl:"מראיינות:",pickH:"בחרי את צמד המראיינות",pickP:"לחצי על הצמד שלך למעלה. המכשיר יזכור אותו, ואפשר להחליף בכל רגע.",
+ candidates:"מועמדות",newc:"מועמדת חדשה",cand:"מועמדת",roleOtherPh:"איזה תפקיד?",other:"אחר",
+ avail:"זמינות",availHint:"לשאול לקראת הסוף",av:["בוקר","אחר הצהריים","ערב","שישי","מוצ\"ש"],perWeek:"פעמים בשבוע",hours:"שעות מועדפות",hoursPh:"מ-16:00, לא בימי ראשון",eng:"רמת אנגלית",enga:"1 אין",engb:"5 שוטפת",
+ emptyH:"התחילי את הראיון הראשון",emptyP:"לחצי על מועמדת חדשה כשהיא מתיישבת. קודם שם וטלפון, ואחר כך ההערות.",
+ name:"שם מלא",role:"התפקידים שמעניינים אותה (אפשר לבחור כמה)",phone:"טלפון",
+ also:"רואיינה גם על ידי צמד אחר",alsoNotePh:"הערה קצרה, למשל לאיזה תפקיד",matchPre:"רואיינה גם על ידי",matchFor:"לתפקיד",
+ during:"הערות",duringHint:"מספיקות מילות מפתח",exp:"סיכום קצר של הניסיון שלה",s1:"מקרה שמשהו לא עבד והיא שינתה משהו כדי לשפר",s2:"טעות שעשתה ומה עשתה אחריה",
+ gap:"בשתי הדקות שבין מועמדות",gapHint:"למלא קודם, כל עוד זה טרי",
+ r1:"ניסיון קודם וכישורים",r1a:"1 שלילי",r1b:"5 מצוין",r2:"התאמה לתרבות הארגונית",r2a:"1 אי התאמה",r2b:"5 יוצא דופן",r3:"רושם על ביטחון עצמי",r3a:"1 לא",r3b:"5 כן",
+ rec:"המלצה",recv:["להתקדם","אולי","לא מתאימה"],otherph:"ניסוח משלך",summary:"סיכום / הערות",summaryph:"כל דבר נוסף, ומה היית אומרת עליה לעמיתה",
+ send:"שליחה לטופס",copy:"העתקת הערות",del:"מחיקה",delSure:"לחצי שוב למחיקה",next:"המועמדת הבאה",
+ sNotes:"הערות",sReady:"מוכנה",sSent:"נשלחה",saved:"נשמר",saving:"שומר…",unsynced:"עוד לא נשמר ברשת, מנסה שוב",
+ sentNote:"נפתח בטופס. בדקי את התשובות ולחצי שם על שליחה.",sentAt:"נשלחה לטופס",unsend:"סמני כלא נשלחה",
+ tally:(a,b,c)=>`${a} מועמדות · ${b} מוכנות · ${c} נשלחו`,copied:"ההערות הועתקו",copyFail:"סמני את הטקסט והעתיקי",
+ offline:"אין כרגע חיבור לגיליון. ההערות נשמרות במכשיר ויישמרו בגיליון כשהחיבור יחזור.",
+ notSetup:"ההתקנה עוד לא הושלמה: הקישור ל-Apps Script עוד לא נוסף לדף.",flagsFor:"סימני אזהרה"}
+};
+
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let lang=ls.get("ia-lang","he"); const t=k=>T[lang][k];
+let cfg=ls.get("ia-cfg",DEFAULT_CFG); let pair=ls.get("ia-pair",""); let C={}; let sel=null; let delArm=null;
+const unsynced=new Set(ls.get("ia-unsynced",[])); const timers={}; let inflight=0; let bannerKey=null;
+const READY=SCRIPT_URL&&!/PASTE_/.test(SCRIPT_URL);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const one=s=>String(s||"").trim().replace(/\s*\n+\s*/g," · ");
+const digits=p=>String(p||"").replace(/\D/g,"");
+
+function showBanner(k){bannerKey=k;$("banner").hidden=!k;if(k)$("banner").textContent=t(k)}
+function toast(m){const el=$("toast");el.textContent=m;el.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("on"),2400)}
+function status(c){if(c.sentAt)return"sent";if(c.r1&&c.r2&&c.r3&&(c.rec||c.recOther))return"ready";return"notes"}
+function sorted(){return Object.values(C).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))}
+function ensureSel(){if(!sel||!C[sel]){const l=sorted();sel=(l.find(x=>!x.sentAt)||l[0])?.id||null}}
+function label(c){if(c.name&&c.name.trim())return c.name;const i=sorted().findIndex(x=>x.id===c.id);return t("cand")+" "+(i+1)}
+function rolesOf(c){const r=(c.roles||[]).slice();if(c.roleOtherOn&&c.roleOther&&c.roleOther.trim())r.push(c.roleOther.trim());return r.join(", ")}
+function flagLabel(he){const f=cfg.flags.find(x=>x.he===he);return lang==="he"?he:(f?f.en:he)}
+
+/* ---------- backend ---------- */
+async function api(params){const u=SCRIPT_URL+"?"+new URLSearchParams(params).toString();const r=await fetch(u);if(!r.ok)throw new Error(r.status);const j=await r.json();if(j.error)throw new Error(j.error);return j}
+async function post(body){const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(body)});if(!r.ok)throw new Error(r.status);const j=await r.json();if(j.error)throw new Error(j.error);return j}
+function cacheKey(){return "ia-cands-"+pair}
+function persist(){if(pair)ls.set(cacheKey(),C);ls.set("ia-unsynced",[...unsynced])}
+function setSave(){const el=$("savestate");if(!el)return;el.textContent=inflight?t("saving"):(unsynced.size?t("unsynced"):t("saved"))}
+function queueSave(id){if(C[id])C[id].updatedAt=Date.now();unsynced.add(id);persist();setSave();clearTimeout(timers[id]);timers[id]=setTimeout(()=>flush(id),800)}
+async function flush(id){
+  if(!READY)return; delete timers[id]; inflight++;setSave();
+  try{ if(C[id])await post({action:"save",c:C[id]}); else await post({action:"delete",id}); unsynced.delete(id); if(bannerKey==="offline")showBanner(null)}
+  catch(e){showBanner("offline")}
+  finally{inflight--;persist();setSave()}
+}
+setInterval(()=>{if(READY&&unsynced.size&&!inflight)[...unsynced].forEach(id=>{if(!timers[id])flush(id)})},15000);
+
+async function loadConfig(){if(!READY)return;try{const j=await api({action:"config"});if(j.pairs&&j.pairs.length){cfg={pairs:j.pairs,roles:j.roles||[],flags:j.flags||[]};ls.set("ia-cfg",cfg);renderPairs();renderSheet()}}catch(e){}}
+async function loadPair(){
+  C=ls.get(cacheKey(),{});sel=null;renderRail();renderSheet();
+  if(!READY){showBanner("notSetup");return}
+  try{const j=await api({action:"list",pair});
+    const remote={};(j.candidates||[]).forEach(c=>{remote[c.id]=c});
+    Object.keys(remote).forEach(id=>{const r=remote[id],l=C[id];if(!l||(r.updatedAt||0)>(l.updatedAt||0))C[id]=r});
+    Object.keys(C).forEach(id=>{if(!remote[id]||(C[id].updatedAt||0)>(remote[id].updatedAt||0)){unsynced.add(id)}});
+    persist();renderRail();if(!$("sheet").contains(document.activeElement))renderSheet();
+    [...unsynced].forEach(id=>{if(C[id])flush(id)});
+    if(bannerKey==="offline")showBanner(null);
+  }catch(e){showBanner("offline")}
+}
+const matchTimers={};
+function checkMatch(id){clearTimeout(matchTimers[id]);matchTimers[id]=setTimeout(async()=>{
+  const c=C[id];if(!c||!READY)return;if(digits(c.phone).length<9){if(c.matches&&c.matches.length){c.matches=[];queueSave(id);renderMatch()}return}
+  try{const j=await api({action:"match",phone:c.phone,pair,id});c.matches=j.matches||[];queueSave(id);if(id===sel)renderMatch()}catch(e){}
+},700)}
+
+/* ---------- form link ---------- */
+function availLine(c){const parts=[];const d=(c.avail||[]);if(d.length)parts.push("זמינות: "+d.join(", "));if(c.perWeek)parts.push(c.perWeek+" פעמים בשבוע");
+  if(c.hours&&c.hours.trim())parts.push("שעות: "+one(c.hours));if(c.eng)parts.push("אנגלית "+c.eng+"/5");return parts.join(" · ")}
+function warnLine(c){const f=c.flags||[];return f.length?"⚠ סימני אזהרה: "+f.join(", "):""}
+function alsoLine(c){const bits=[];const seen=new Set();
+  (c.matches||[]).forEach(m=>{seen.add(m.pair);bits.push(m.pair+(m.roles?" ("+m.roles+")":""))});
+  (c.alsoBy||[]).forEach(p=>{if(!seen.has(p))bits.push(p)});
+  let s=bits.length?"ראיון נוסף: "+bits.join(", "):"";if(c.alsoNote&&c.alsoNote.trim())s+=(s?" · ":"ראיון נוסף: ")+one(c.alsoNote);return s}
+function formUrl(c){
+  const p=[];const add=(k,v)=>{if(v!==undefined&&v!==null&&String(v).trim()!=="")p.push("entry."+E[k]+"="+encodeURIComponent(v))};
+  add("interviewer",pair);add("name",c.name);add("phone",c.phone);add("role",rolesOf(c));add("exp",one(c.exp));
+  add("s1",one(c.s1));add("s2",one(c.s2));add("r1",c.r1);add("r2",c.r2);add("r3",c.r3);
+  if(c.rec)add("rec",c.rec);else if(c.recOther){p.push("entry."+E.rec+"=__other_option__");p.push("entry."+E.rec+".other_option_response="+encodeURIComponent(c.recOther))}
+  add("summary",[alsoLine(c),availLine(c),warnLine(c),one(c.summary)].filter(x=>x).join(" · "));
+  return FORM_BASE+"&"+p.join("&");
+}
+function notesText(c){const L=T[lang];const recLabel=c.rec?L.recv[REC.indexOf(c.rec)]:(c.recOther||"");
+  const av=(c.avail||[]).map(h=>L.av[AVHE.indexOf(h)]||h);
+  return [`${L.name}: ${c.name||""}`,`${L.phone}: ${c.phone||""}`,`${L.role}: ${rolesOf(c)}`,alsoLine(c),
+   `${L.exp}: ${c.exp||""}`,`${L.s1}: ${c.s1||""}`,`${L.s2}: ${c.s2||""}`,(c.flags||[]).length?`${L.flagsFor}: ${(c.flags||[]).map(flagLabel).join(", ")}`:"",
+   `${L.avail}: ${av.join(", ")}`,`${L.perWeek}: ${c.perWeek||"-"}`,`${L.hours}: ${c.hours||""}`,`${L.eng}: ${c.eng||"-"}`,
+   `${L.r1}: ${c.r1||"-"}`,`${L.r2}: ${c.r2||"-"}`,`${L.r3}: ${c.r3||"-"}`,`${L.rec}: ${recLabel}`,`${L.summary}: ${c.summary||""}`].filter(Boolean).join("\n")}
+
+/* ---------- render ---------- */
+function applyLang(){document.documentElement.lang=lang;$("app").dir=lang==="he"?"rtl":"ltr";$("toast").dir=$("app").dir;
+  document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));if(bannerKey)$("banner").textContent=t(bannerKey);
+  $("lang-en").setAttribute("aria-pressed",lang==="en");$("lang-he").setAttribute("aria-pressed",lang==="he")}
+function renderPairs(){$("pairs").innerHTML=`<span class="lbl">${t("pairsLbl")}</span>`+cfg.pairs.map(p=>`<button type="button" class="chip" data-pair="${esc(p)}" aria-pressed="${p===pair}">${esc(p)}</button>`).join("")}
+function renderRail(){ensureSel();const list=sorted();const L=T[lang];
+  $("newc").hidden=!pair;
+  $("list").innerHTML=list.map(c=>{const s=status(c);const lab={notes:L.sNotes,ready:L.sReady,sent:L.sSent}[s];
+    return `<button type="button" class="item${c.id===sel?" sel":""}" data-id="${c.id}"><span class="nm">${esc(label(c))}<span class="rl">${esc(rolesOf(c))}</span></span><span class="pill p-${s}">${lab}</span></button>`}).join("");
+  $("tally").textContent=pair?L.tally(list.length,list.filter(c=>status(c)==="ready").length,list.filter(c=>c.sentAt).length):""}
+function btns(k,vals,labels,c,ltr){return `<div class="btns" data-k="${k}">${vals.map((v,i)=>`<button type="button" class="b" data-v="${esc(v)}" aria-pressed="${String(c[k])===String(v)}"${ltr?' dir="ltr"':''}>${esc(labels[i])}</button>`).join("")}</div>`}
+function scale(k,c){const L=T[lang];return `<div class="scale"><span class="q ql">${L[k]}</span>${btns(k,[1,2,3,4,5],[1,2,3,4,5],c)}<div class="ends"><span>${L[k+"a"]}</span><span>${L[k+"b"]}</span></div></div>`}
+function chipList(group,vals,labels,selected){return `<div class="flags" data-group="${group}">${vals.map((v,i)=>`<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${selected.includes(v)}">${esc(labels[i])}</button>`).join("")}</div>`}
+function renderMatch(){const el=$("match");const c=C[sel];if(!el||!c)return;const m=c.matches||[];
+  el.hidden=!m.length;el.textContent=m.length?"ⓘ "+m.map(x=>`${t("matchPre")} ${x.pair}${x.roles?" "+t("matchFor")+" "+x.roles:""}`).join(" · "):""}
+function renderSheet(){
+  const L=T[lang];
+  if(!pair){$("sheet").innerHTML=`<div class="pick"><h3>${L.pickH}</h3><p class="note">${L.pickP}</p></div>`;return}
+  ensureSel();const c=C[sel];
+  if(!c){$("sheet").innerHTML=`<div class="empty"><h3>${L.emptyH}</h3><p>${L.emptyP}</p></div>`;return}
+  const roleVals=[...cfg.roles];const others=cfg.pairs.filter(p=>p!==pair);
+  $("sheet").innerHTML=`
+  <div class="row">
+    <label class="f">${L.name}<input type="text" id="f-name" data-f="name" value="${esc(c.name)}" autocomplete="off"></label>
+    <label class="f">${L.phone}<input type="tel" id="f-phone" data-f="phone" value="${esc(c.phone)}" dir="ltr" autocomplete="off"></label>
+  </div>
+  <div class="info" id="match" hidden></div>
+  <div class="q"><span class="ql">${L.role}</span>
+    <div class="flags" data-group="roles">${roleVals.map(v=>`<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${(c.roles||[]).includes(v)}">${esc(v)}</button>`).join("")}<button type="button" class="chip" data-toggle="roleOtherOn" aria-pressed="${!!c.roleOtherOn}">${L.other}</button></div>
+    <label class="f" id="roleOtherWrap" style="max-width:360px" ${c.roleOtherOn?"":"hidden"}><input type="text" id="f-roleOther" data-f="roleOther" value="${esc(c.roleOther)}" placeholder="${L.roleOtherPh}" autocomplete="off"></label></div>
+  <div class="q"><span class="ql">${L.also}</span>${chipList("alsoBy",others,others,c.alsoBy||[])}
+    <input type="text" id="f-alsoNote" data-f="alsoNote" value="${esc(c.alsoNote)}" placeholder="${L.alsoNotePh}" autocomplete="off" style="max-width:480px"></div>
+  <section class="sec">
+    <div class="sec-h"><h2>${L.during}</h2><span class="hint">${L.duringHint}</span></div>
+    <label class="f q"><span class="ql">${L.exp}</span><textarea id="f-exp" data-f="exp" rows="2">${esc(c.exp)}</textarea></label>
+    <label class="f q"><span class="ql">${L.s1}</span><textarea id="f-s1" data-f="s1" rows="2">${esc(c.s1)}</textarea></label>
+    <label class="f q"><span class="ql">${L.s2}</span><textarea id="f-s2" data-f="s2" rows="2">${esc(c.s2)}</textarea></label>
+    <div class="q"><span class="ql">${L.flagsFor}</span><div class="flags" data-group="flags">${cfg.flags.map(f=>`<button type="button" class="flag" data-v="${esc(f.he)}" aria-pressed="${(c.flags||[]).includes(f.he)}">⚠ ${esc(lang==="he"?f.he:f.en)}</button>`).join("")}</div></div>
+  </section>
+  <section class="sec">
+    <div class="sec-h"><h2>${L.avail}</h2><span class="hint">${L.availHint}</span></div>
+    ${chipList("avail",AVHE,L.av,c.avail||[])}
+    <div class="rates">
+      <div class="q"><span class="ql">${L.perWeek}</span>${btns("perWeek",PW,PW,c,true)}</div>
+      <label class="f q"><span class="ql">${L.hours}</span><input type="text" id="f-hours" data-f="hours" value="${esc(c.hours)}" placeholder="${L.hoursPh}" autocomplete="off"></label>
+      ${scale("eng",c)}
+    </div>
+  </section>
+  <section class="sec">
+    <div class="sec-h"><h2>${L.gap}</h2><span class="hint">${L.gapHint}</span></div>
+    <div class="rates">${scale("r1",c)}${scale("r2",c)}${scale("r3",c)}</div>
+    <div class="q rec"><span class="ql">${L.rec}</span>${btns("rec",REC,L.recv,c)}
+      <label class="f" style="max-width:360px">${L.other}<input type="text" id="f-recOther" data-f="recOther" value="${esc(c.recOther)}" placeholder="${L.otherph}" autocomplete="off"></label></div>
+    <label class="f q"><span class="ql">${L.summary}</span><textarea id="f-summary" data-f="summary" rows="3" placeholder="${L.summaryph}">${esc(c.summary)}</textarea></label>
+  </section>
+  ${c.sentAt?`<p class="note">✓ ${L.sentAt} · <button type="button" class="btn ghost" id="unsend" style="padding:2px 6px">${L.unsend}</button></p>`:""}
+  <div class="actions">
+    <div style="display:flex;gap:10px;align-items:center"><span class="save" id="savestate"></span><button type="button" class="btn ghost danger" id="del">${delArm===sel?L.delSure:L.del}</button></div>
+    <div class="act-r">
+      <button type="button" class="btn" id="copy">${L.copy}</button>
+      <button type="button" class="btn" id="next">${L.next}</button>
+      <a class="btn primary" id="send" href="${esc(formUrl(c))}" target="_blank" rel="noopener">${L.send} ↗</a>
+    </div>
+  </div>`;
+  renderMatch();setSave();
+}
+function renderAll(){applyLang();renderPairs();renderRail();renderSheet()}
+function refreshLink(){const a=$("send");if(a&&C[sel])a.href=formUrl(C[sel])}
+
+/* ---------- events ---------- */
+function newCandidate(){if(!pair)return;const id="c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  C[id]={id,pair,name:"",createdAt:Date.now()};sel=id;delArm=null;queueSave(id);renderRail();renderSheet();window.scrollTo({top:0});$("f-name")?.focus()}
+$("newc").onclick=newCandidate;
+$("pairs").onclick=(e=>{const b=e.target.closest("[data-pair]");if(!b)return;pair=b.dataset.pair;ls.set("ia-pair",pair);renderPairs();loadPair()});
+$("list").onclick=(e=>{const b=e.target.closest(".item");if(!b)return;sel=b.dataset.id;delArm=null;renderRail();renderSheet()});
+document.querySelectorAll(".lang button").forEach(b=>{b.onclick=()=>{lang=b.dataset.lang;ls.set("ia-lang",lang);renderAll()}});
+$("sheet").oninput=(e=>{const f=e.target.dataset.f;if(!f||!C[sel])return;const c=C[sel];c[f]=e.target.value;
+  if(f==="recOther"&&e.target.value.trim()){c.rec="";document.querySelectorAll('[data-k="rec"] .b').forEach(x=>x.setAttribute("aria-pressed","false"))}
+  queueSave(sel);refreshLink();if(f==="phone")checkMatch(sel);if(f==="name"||f==="roleOther")renderRail()});
+$("sheet").onclick=(async e=>{
+  const c=C[sel];if(!c)return;
+  const tg=e.target.closest("[data-toggle]");if(tg){const k=tg.dataset.toggle;c[k]=!c[k];tg.setAttribute("aria-pressed",!!c[k]);
+    if(k==="roleOtherOn"){$("roleOtherWrap").hidden=!c.roleOtherOn;if(c.roleOtherOn)$("f-roleOther").focus()}queueSave(sel);refreshLink();renderRail();return}
+  const gb=e.target.closest("[data-group] [data-v]");if(gb){const g=gb.closest("[data-group]").dataset.group;const v=gb.dataset.v;const arr=c[g]=(c[g]||[]).slice();
+    const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);gb.setAttribute("aria-pressed",i<0);queueSave(sel);refreshLink();if(g==="roles")renderRail();return}
+  const bb=e.target.closest(".btns .b");if(bb){const k=bb.parentElement.dataset.k;const v=bb.dataset.v;c[k]=String(c[k])===v?"":v;
+    if(k==="rec"&&c.rec){c.recOther="";const o=$("f-recOther");if(o)o.value=""}
+    bb.parentElement.querySelectorAll(".b").forEach(x=>x.setAttribute("aria-pressed",String(c[k])===x.dataset.v));queueSave(sel);refreshLink();renderRail();return}
+  if(e.target.closest("#send")){c.sentAt=Date.now();queueSave(sel);setTimeout(()=>{renderRail();renderSheet();toast(t("sentNote"))},50);return}
+  if(e.target.closest("#unsend")){c.sentAt=null;queueSave(sel);renderRail();renderSheet();return}
+  if(e.target.closest("#copy")){const txt=notesText(c);try{await navigator.clipboard.writeText(txt);toast(t("copied"))}catch(err){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(t("copied"))}catch(_){toast(t("copyFail"))}ta.remove()}return}
+  if(e.target.closest("#next")){const l=sorted();const i=l.findIndex(x=>x.id===sel);const nx=l.slice(i+1).find(x=>!x.sentAt)||l.find(x=>status(x)==="notes"&&x.id!==sel);
+    if(nx){sel=nx.id;delArm=null;renderRail();renderSheet();window.scrollTo({top:0})}else newCandidate();return}
+  if(e.target.closest("#del")){if(delArm!==sel){delArm=sel;e.target.closest("#del").textContent=t("delSure");setTimeout(()=>{if(delArm===sel){delArm=null;const d=$("del");if(d)d.textContent=t("del")}},3000);return}
+    const id=sel;delete C[id];delArm=null;sel=null;queueSave(id);renderRail();renderSheet();return}
+});
+window.onerror=(msg=>{const b=$("banner");b.hidden=false;b.textContent="Something went wrong: "+msg+". Reload the page. Your notes are kept on this device."});
+
+renderAll();
+if(!READY)showBanner("notSetup");
+loadConfig();
+if(pair)loadPair();
+})();
+</script>
+</body>
+</html>
